@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汤圆的醒木</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml;base64,PHN2ZyB0PSIxNzMzMzYwNTE0MzY4IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1MzIiIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48cGF0aCBkPSJNNjQgMzQxLjJ2NTQ4LjNoMTM3LjlsLTMxLjQtNTQ4LjN6TTgwMy4zIDE4Ny43djE4MS45TDk2MCAzNDUuMlYxNjIuN3pNODAzLjMgNDE4SDk2MHY0NTguOUg4MDMuM3pNNTA2LjUgNjc2LjNsMTIxLjMgMTguOCAxNTYuOC00NjMuNS0xMTUuOS00My45ek00NDkuMyA4NDguOGwxMTIuOCA0MC43IDQ1LTEzMy0xMTUuMy0zNS42ek0xODguOCAyNjYuMkg0MThWMTM0LjVsLTIzNC45IDE4Ljh6TTE5Ni40IDQxNC4ySDQxOFYzMDMuN0gxOTAuN3pNMjIwLjcgODg5LjVINDE4VjQzNy43SDE5Ny42eiIgZmlsbD0iIzFEMUQxQiIgcC1pZD0iMTUzMyI+PC9wYXRoPjwvc3ZnPg==">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* 使用更现代的字体 */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
+            /* 添加渐变背景 */
+        }
+
+        #background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* 添加阴影 */
+        }
+
+        #drop-area {
+            border: 2px dashed #e4f1ff;
+            /* 改变边框颜色 */
+            border-radius: 20px;
+            width: 480px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: border-color 0.3s ease;
+            /* 添加过渡效果 */
+        }
+
+        #drop-area.highlight {
+            border-color: #6610f2;
+            /* 改变高亮颜色 */
+        }
+
+        #reader-container {
+            flex-grow: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #epub-viewer {
+            flex-grow: 1;
+            height: calc(100vh - 140px);
+            overflow: hidden;
+            display: flex;
+            transition: all 0.3s ease;
+        }
+
+        .page {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+
+        #settings-ball {
+            top: 20px;
+            right: 20px;
+        }
+
+        #toc-ball {
+            top: 20px;
+            left: 20px;
+        }
+
+
+
+        #settings-panel {
+            top: 90px;
+            right: 20px;
+            width: 360px;
+            /* 稍微加宽以适应分类 */
+            max-height: 80vh;
+            overflow-y: auto;
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            font-family: "FZYaoti", "STXingkai", "楷体", sans-serif;
+        }
+
+        /* 设置分类标题 */
+        .settings-category {
+            margin: 25px 0;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-category:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .settings-category h3 {
+            font-size: 1.1em;
+            color: rgba(0, 0, 0, 0.75);
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 3px solid rgba(0, 0, 0, 0.6);
+        }
+
+        /* 设置项容器 */
+        #settings>div {
+            margin: 12px 0;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 设置项悬停效果 */
+        #settings>div:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateX(5px);
+        }
+
+        /* 标签样式 */
+        #settings label {
+            color: rgba(0, 0, 0, 0.75);
+            font-size: 0.95em;
+            white-space: nowrap;
+            transition: color 0.3s ease;
+        }
+
+        #settings>div:hover label {
+            color: rgba(0, 0, 0, 0.9);
+        }
+
+        /* 输入控件统一样式 */
+        #settings input[type="range"],
+        #settings input[type="color"],
+        #settings input[type="text"],
+        #settings input[type="file"],
+        #settings select {
+            width: 100%;
+            height: 36px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            padding: 0 10px;
+        }
+
+        /* 文件上传按钮美化 */
+        #settings input[type="file"] {
+            position: relative;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        #settings input[type="file"]::before {
+            content: '选择文件';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        /* 分类按钮组 */
+        .settings-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .settings-buttons button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .settings-buttons button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-2px);
+        }
+
+        #settings h2 {
+            color: rgba(0, 0, 0, 0.85);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 10px;
+        }
+
+        #settings>div {
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #settings>div:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        #settings label {
+            color: rgba(0, 0, 0, 0.75);
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+
+        /* 统一输入控件样 */
+        #settings input[type="range"],
+        #settings input[type="color"],
+        #settings input[type="text"],
+        #settings select {
+            width: 100%;
+            height: 36px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            padding: 0 10px;
+        }
+
+        /* 滑块特殊样式 */
+        #settings input[type="range"] {
+            -webkit-appearance: none;
+            background: rgba(0, 0, 0, 0.1);
+            height: 4px;
+            padding: 0;
+        }
+
+        #settings input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #settings input[type="range"]::-webkit-slider-thumb:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: scale(1.2);
+        }
+
+        /* 颜色选择器特殊样式 */
+        #settings input[type="color"] {
+            padding: 2px 4px;
+            cursor: pointer;
+        }
+
+        /* 下拉框特殊样式 */
+        #settings select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(0,0,0,0.5)' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+
+        /* 按钮样式 */
+        #settings button {
+            grid-column: 1 / -1;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #settings button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 关闭按钮样式 */
+        .close-panel {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-panel:hover {
+            background: rgba(0, 0, 0, 0.2);
+            color: rgba(0, 0, 0, 0.8);
+            transform: rotate(90deg);
+        }
+
+        /* 自定义滚动条 */
+        #settings-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #settings-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        #settings-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        #settings-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        #toc-panel {
+            top: 90px;
+            right: 20px;
+            width: 300px;
+            max-height: 80vh;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        /* 目录标题样式 */
+        #toc-panel h2 {
+            color: rgba(0, 0, 0, 0.85);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 10px;
+        }
+
+        /* 目录项样式 */
+        .toc-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            color: rgba(0, 0, 0, 0.75);
+            font-size: 0.95em;
+        }
+
+        /* 目录项悬停效果 */
+        .toc-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+            transform: translateX(5px);
+            color: rgba(0, 0, 0, 0.95);
+        }
+
+        /* 目录项点击效果 */
+        .toc-item:active {
+            transform: scale(0.98);
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* 目录项波纹效果 */
+        .toc-item::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            border-radius: 100%;
+            transform: translate(-50%, -50%) scale(1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toc-item:active::after {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(50);
+        }
+
+        /* 目录层级缩进和标记 */
+        .toc-item[data-level="1"] {
+            padding-left: 25px;
+        }
+
+        .toc-item[data-level="2"] {
+            padding-left: 35px;
+        }
+
+        .toc-item::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 自定义滚动条 */
+        #toc-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #toc-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        #toc-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        #toc-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        #navigation {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 4px;
+        }
+
+        #navigation button {
+            margin: 0 5px;
+            padding: 10px 20px;
+            background-color: #a7c5e5c6;
+            /* 按钮背景色 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            /* 添加过渡效果 */
+        }
+
+        #navigation button:hover {
+            background-color: #0057b3b7;
+            /* 按钮悬停颜色 */
+        }
+
+        .floating-ball {
+            position: absolute;
+            /* 确保悬浮球是绝对定位 */
+            width: 50px;
+            /* 设置宽度 */
+            height: 50px;
+            /* 设置高度 */
+            border-radius: 50%;
+            /* 圆形 */
+            background-color: #000000d6;
+            /* 改变浮动球颜色 */
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            z-index: 100;
+            /* 确保 z-index 足够高 */
+        }
+
+        .floating-ball:hover {
+            background-color: #518ecfd6;
+            transform: scale(1.1);
+            /* 悬停时放大 */
+        }
+
+        .expanded-panel {
+            background-color: rgba(255, 255, 255, 0.76);
+            /* 改变面板背景 */
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .close-panel {
+            color: #292929f4;
+            /* 改变关闭按钮颜色 */
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .floating-balls-container {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            width: 50px;
+            height: 100px;
+            z-index: 1000;
+        }
+
+        .floating-ball {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 20%;
+            background-color: #0000009e;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            /* 弹性动画 */
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #settings-ball {
+            background-color: #000000d2;
+            top: 0;
+        }
+
+        #toc-ball {
+
+            top: 0px;
+            opacity: 0.7;
+
+        }
+
+        .floating-ball:hover {
+            transform: scale(1.1);
+            z-index: 1001;
+            background-color: #000000f0;
+        }
+
+        #toc-ball:hover {
+            opacity: 1;
+            transform: scale(1.1);
+
+        }
+
+        .expanded-panel {
+            position: fixed;
+            background-color: rgba(1, 1, 1, 0.731);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: none;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        }
+
+        .expanded-panel.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        #progress-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: rgba(200, 200, 200, 0.3);
+            z-index: 1001;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, #4c70afd3, #d721f3a9);
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        #progress-text {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1002;
+        }
+
+        #progress-container:hover #progress-text {
+            opacity: 1;
+        }
+
+        /* 快捷键面板样式 */
+        #shortcut-panel {
+            top: 90px;
+            right: 20px;
+            width: 280px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            transform-origin: top right;
+        }
+
+        /* 快捷键标题样式 */
+        #shortcut-panel h2 {
+            color: rgba(0, 0, 0, 0.85);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 10px;
+        }
+
+        /* 快捷键列表样式 */
+        #shortcut-panel ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* 快捷键项样式 */
+        #shortcut-panel li {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 快捷键项悬停效果 */
+        #shortcut-panel li:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 快捷键按键样式 */
+        #shortcut-panel li::before {
+            content: attr(data-key);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 6px;
+            margin-right: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        /* 快捷键按键悬停效果 */
+        #shortcut-panel li:hover::before {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* 快捷键描述文本样式 */
+        #shortcut-panel li {
+            color: rgba(0, 0, 0, 0.75);
+            font-size: 0.95em;
+        }
+
+        /* 面板展开动画 */
+        #shortcut-panel.active {
+            animation: expandPanel 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes expandPanel {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 面板关闭动画 */
+        #shortcut-panel:not(.active) {
+            animation: collapsePanel 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes collapsePanel {
+            from {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+        }
+
+        /* 波纹效果 */
+        .ripple {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="background-container"></div>
+    <h1>汤圆的醒木</h1>
+    <div id="drop-area">
+        <p>将 EPUB 文件拖放到此处或点击上传</p>
+        <input type="file" id="fileElem" accept=".epub" style="display:none">
+    </div>
+    <div id="reader-container" style="display:none;">
+        <div id="epub-viewer"></div>
+        <div class="floating-balls-container">
+            <div id="settings-ball" class="floating-ball"></div>
+            <div id="toc-ball" class="floating-ball"></div>
+            <div id="shortcut-ball" class="floating-ball"></div>
+        </div>
+        <div id="settings-panel" class="expanded-panel">
+            <span class="close-panel" onclick="toggleSettings()">×</span>
+            <h2>阅读设置</h2>
+            <div id="settings">
+                <div>
+                    <label for="fontSize">字体大小</label>
+                    <input type="range" id="fontSize" min="12" max="24" value="16">
+                </div>
+                <div>
+                    <label for="lineHeight">行高：</label>
+                    <input type="range" id="lineHeight" min="1" max="2" step="0.1" value="1.5">
+                </div>
+                <div>
+                    <label for="fontFamily">字体：</label>
+                    <select id="fontFamily"></select>
+                </div>
+                <div>
+                    <label for="letterSpacing">字间距：</label>
+                    <input type="range" id="letterSpacing" min="-2" max="5" value="0">
+                </div>
+                <div>
+                    <label for="textColor">字体颜色：</label>
+                    <input type="color" id="textColor" value="#000000">
+                </div>
+                <div>
+                    <label for="textOpacity">字体不透明度：</label>
+                    <input type="range" id="textOpacity" min="0" max="1" step="0.1" value="1">
+                </div>
+                <div>
+                    <label for="backgroundColor">背景颜色：</label>
+                    <input type="color" id="backgroundColor" value="#ffffff">
+                </div>
+                <div>
+                    <label for="backgroundOpacity">背景不透明度：</label>
+                    <input type="range" id="backgroundOpacity" min="0" max="1" step="0.1" value="1">
+                </div>
+                <div>
+                    <label for="backgroundImage">背景图片：</label>
+                    <input type="file" id="backgroundImage" accept="image/*">
+                </div>
+                <div>
+                    <label for="backgroundImageUrl">背景图片URL：</label>
+                    <input type="text" id="backgroundImageUrl">
+                    <button id="applyBackgroundImageUrl">应用</button>
+                </div>
+                <div>
+                    <label for="pageMode">翻页模式：</label>
+                    <select id="pageMode">
+                        <option value="scroll">向下滚动流</option>
+                        <option value="slide">向左翻页流</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="pageCount">显示页面数：</label>
+                    <select id="pageCount">
+                        <option value="1">1页</option>
+                        <option value="2">2页</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="autoScroll">自动滚动：</label>
+                    <input type="checkbox" id="autoScroll">
+                </div>
+                <div>
+                    <label for="scrollSpeed">滚动速度：</label>
+                    <input type="range" id="scrollSpeed" min="1" max="10" value="3" disabled>
+                </div>
+                <div>
+                    <button id="selectBook">选择新书籍</button>
+                </div>
+                <button onclick="saveSettings()">保存设置</button>
+            </div>
+        </div>
+
+        <div id="toc-panel" class="expanded-panel">
+            <span class="close-panel" onclick="toggleToc()">×</span>
+            <h2>目录</h2>
+            <div id="toc"></div>
+        </div>
+
+        <div id="shortcut-panel" class="expanded-panel">
+            <span class="close-panel" onclick="toggleShortcut()">×</span>
+            <h2>快捷键提示</h2>
+            <ul>
+                <li data-key="F">选择新书籍</li>
+                <li data-key="A">上一页</li>
+                <li data-key="D">下一页</li>
+                <li data-key="Q">上一章</li>
+                <li data-key="E">下一章</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div id="navigation" style="display:none;">
+        <button id="prevChapter">上一章</button>
+        <button id="prevPage">上一页</button>
+        <button id="nextPage">下一页</button>
+        <button id="nextChapter">下一章</button>
+    </div>
+
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+        <div id="progress-text"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+    <script>
+        let book, rendition;
+        let currentPage = 0;
+        let totalPages = 0;
+        let currentChapter = 0;
+        const dropArea = document.getElementById('drop-area');
+        const fileElem = document.getElementById('fileElem');
+        const readerContainer = document.getElementById('reader-container');
+        const settingsBall = document.getElementById('settings-ball');
+        const settingsPanel = document.getElementById('settings-panel');
+        const tocBall = document.getElementById('toc-ball');
+        const tocPanel = document.getElementById('toc-panel');
+        const tocContainer = document.getElementById('toc');
+        const fontFamilySelect = document.getElementById('fontFamily');
+        const backgroundContainer = document.getElementById('background-container');
+        const epubViewer = document.getElementById('epub-viewer');
+        const navigation = document.getElementById('navigation');
+        const shortcutBall = document.getElementById('shortcut-ball');
+        const shortcutPanel = document.getElementById('shortcut-panel');
+
+
+
+
+        function toggleShortcut() {
+            togglePanel(shortcutPanel);
+        }
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+        dropArea.addEventListener('click', () => fileElem.click());
+        fileElem.addEventListener('change', handleFiles);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files instanceof FileList) {
+                ([...files]).forEach(uploadFile);
+            } else {
+                uploadFile(files.target.files[0]);
+            }
+        }
+
+        function uploadFile(file) {
+            if (file.type !== "application/epub") {
+                alert("请上传EPUB格式的文件。");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                loadBook(e.target.result, file.name);
+            }
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadBook(arrayBuffer, fileName) {
+            // 清除旧的小说内容
+            if (book) {
+                book.destroy();
+            }
+            epubViewer.innerHTML = '';
+
+            book = ePub(arrayBuffer);
+            rendition = book.renderTo("epub-viewer", {
+                width: "100%",
+                height: "100%",
+                spread: "none"
+            });
+            rendition.display();
+
+            book.loaded.cover.then(function (cover) {
+                settingsBall.style.backgroundImage = `url(${cover})`;
+                tocBall.style.backgroundImage = `url(${cover})`;
+                shortcutBall.style.backgroundImage = `url(${cover})`;
+            });
+
+            book.loaded.metadata.then(function (metadata) {
+                document.title = metadata.title;
+                document.querySelector('h1').textContent = fileName.replace(/\.[^/.]+$/, "");
+            });
+
+            // 清除旧的目录内容
+            tocContainer.innerHTML = '';
+
+            book.loaded.navigation.then(function (toc) {
+                const tocItems = parseToc(toc.toc);
+                renderToc(tocItems);
+            });
+
+            dropArea.style.display = 'none';
+            readerContainer.style.display = 'flex';
+            navigation.style.display = 'flex';
+            loadFonts();
+            applySettings();
+            makeDraggable(document.querySelector('.floating-balls-container'));
+
+            rendition.on("relocated", (location) => {
+                const currentChapter = book.spine.get(location.start.index);
+                const chapterTitle = currentChapter ? (currentChapter.title || `第 ${location.start.index + 1} 章`) : '';
+                document.querySelector('h1').textContent = `【${chapterTitle}`;
+
+                updateNavigation();
+                updateProgressBar();
+            });
+
+
+            book.ready.then(() => {
+                book.locations.generate(1024).then(() => {
+                    totalPages = book.locations.total;
+                    updateNavigation();
+                    updateProgressBar();
+                });
+            });
+        }
+
+        function parseToc(toc, level = 0) {
+            return toc.map(item => {
+                return {
+                    label: item.label,
+                    href: item.href,
+                    subitems: item.subitems ? parseToc(item.subitems, level + 1) : [],
+                    level: level
+                };
+            });
+        }
+
+        function renderToc(items) {
+            // 确保在渲染新目录前清空容器
+            if (tocContainer.children.length > 0) {
+                tocContainer.innerHTML = '';
+            }
+
+            const fragment = document.createDocumentFragment();
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('toc-item');
+                div.textContent = item.label;
+                div.setAttribute('data-level', item.level);
+
+                // 添加点击波纹动画
+                div.addEventListener('click', (e) => {
+                    // 创建波纹效果
+                    const ripple = document.createElement('div');
+                    ripple.classList.add('ripple');
+                    const rect = div.getBoundingClientRect();
+                    ripple.style.left = `${e.clientX - rect.left}px`;
+                    ripple.style.top = `${e.clientY - rect.top}px`;
+                    div.appendChild(ripple);
+
+                    // 移除波纹元
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 1000);
+
+                    rendition.display(item.href);
+                    toggleToc();
+                });
+
+                // 添加hover效果
+                div.addEventListener('mouseenter', () => {
+                    div.style.transform = 'translateX(5px)';
+                });
+
+                div.addEventListener('mouseleave', () => {
+                    div.style.transform = 'translateX(0)';
+                });
+
+                fragment.appendChild(div);
+                if (item.subitems.length > 0) {
+                    const subItems = renderToc(item.subitems);
+                    fragment.appendChild(subItems);
+                }
+            });
+
+            tocContainer.appendChild(fragment);
+            return fragment;
+        }
+
+        function loadFonts() {
+            const defaultFonts = ['Arial', 'Verdana', 'Times New Roman', 'Courier', 'Georgia', 'Palatino', 'Garamond', 'Bookman', 'Comic Sans MS', 'Trebuchet MS', 'Arial Black', 'Impact'];
+
+            defaultFonts.forEach(font => {
+                const option = document.createElement('option');
+                option.value = font;
+                option.textContent = font;
+                fontFamilySelect.appendChild(option);
+            });
+
+            if (window.queryLocalFonts) {
+                window.queryLocalFonts().then(fonts => {
+                    fonts.forEach(font => {
+                        const option = document.createElement('option');
+                        option.value = font.family;
+                        option.textContent = font.family;
+                        fontFamilySelect.appendChild(option);
+                    });
+                }).catch(err => {
+                    console.error('Error loading local fonts:', err);
+                });
+            }
+        }
+
+        function applySettings() {
+            const fontSize = document.getElementById('fontSize').value;
+            const lineHeight = document.getElementById('lineHeight').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+            const letterSpacing = document.getElementById('letterSpacing').value;
+            const textColor = document.getElementById('textColor').value;
+            const textOpacity = document.getElementById('textOpacity').value;
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const backgroundOpacity = document.getElementById('backgroundOpacity').value;
+            const pageMode = document.getElementById('pageMode').value;
+            const pageCount = document.getElementById('pageCount').value;
+
+            const textColorRgba = hexToRgba(textColor, textOpacity);
+            const backgroundColorRgba = hexToRgba(backgroundColor, backgroundOpacity);
+
+            rendition.themes.fontSize(`${fontSize}px`);
+            rendition.themes.default({
+                'body': {
+                    'font-family': fontFamily,
+                    'line-height': lineHeight,
+                    'letter-spacing': `${letterSpacing}px`,
+                    'color': textColorRgba,
+                    'background-color': backgroundColorRgba
+                }
+            });
+
+            backgroundContainer.style.opacity = backgroundOpacity;
+            if (pageMode === 'slide') {
+                epubViewer.style.transition = 'transform 0.3s ease-out';
+            } else {
+                epubViewer.style.transition = 'none';
+            }
+            if (pageMode === 'scroll') {
+                rendition.flow('scrolled');
+            } else {
+                rendition.flow('paginated');
+            }
+
+            if (pageCount === '2') {
+                rendition.spread('auto');
+            } else {
+                rendition.spread('none');
+            }
+
+            rendition.resize();
+        }
+
+        function hexToRgba(hex, opacity) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+
+        document.querySelectorAll('#settings input, #settings select').forEach(el => {
+            el.addEventListener('change', applySettings);
+        });
+
+        document.getElementById('backgroundImage').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    setBackgroundImage(e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('applyBackgroundImageUrl').addEventListener('click', function () {
+            const url = document.getElementById('backgroundImageUrl').value;
+            if (url) {
+                setBackgroundImage(url);
+            }
+        });
+
+        function setBackgroundImage(url) {
+            backgroundContainer.style.backgroundImage = `url(${url})`;
+        }
+
+        function togglePanel(panel) {
+            const isActive = panel.classList.contains('active');
+
+            // 先关闭所有面板
+            document.querySelectorAll('.expanded-panel').forEach(p => {
+                p.classList.remove('active');
+                setTimeout(() => {
+                    if (!p.classList.contains('active')) {
+                        p.style.display = 'none';
+                    }
+                }, 300);
+            });
+
+            if (!isActive) {
+                panel.style.display = 'block';
+                // 强制重排
+                panel.offsetHeight;
+                panel.classList.add('active');
+            }
+        }
+
+        function toggleSettings() {
+            togglePanel(settingsPanel);
+        }
+
+        function toggleToc() {
+            togglePanel(tocPanel);
+        }
+
+        function toggleShortcut() {
+            togglePanel(shortcutPanel);
+        }
+
+        function saveSettings() {
+            applySettings();
+            toggleSettings();
+        }
+
+        function makeDraggable(element) {
+            const container = document.querySelector('.floating-balls-container');
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            let isDragging = false;
+            let velocity = { x: 0, y: 0 };
+            let lastTime = 0;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                isDragging = true;
+                lastTime = Date.now();
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                if (!isDragging) return;
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+
+                const currentTime = Date.now();
+                const deltaTime = (currentTime - lastTime) / 1000;
+                velocity.x = (pos1 / deltaTime) * 0.1;
+                velocity.y = (pos2 / deltaTime) * 0.1;
+                lastTime = currentTime;
+
+                container.style.top = (container.offsetTop - pos2) + "px";
+                container.style.left = (container.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                isDragging = false;
+                document.onmouseup = null;
+                document.onmousemove = null;
+                applyInertia();
+            }
+
+            function applyInertia() {
+                if (Math.abs(velocity.x) < 0.1 && Math.abs(velocity.y) < 0.1) return;
+
+                container.style.top = (container.offsetTop - velocity.y) + "px";
+                container.style.left = (container.offsetLeft - velocity.x) + "px";
+
+                velocity.x *= 0.95;
+                velocity.y *= 0.95;
+
+                requestAnimationFrame(applyInertia);
+            }
+        }
+
+        settingsBall.addEventListener('click', toggleSettings);
+        tocBall.addEventListener('click', toggleToc);
+        shortcutBall.addEventListener('click', toggleShortcut);
+
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (rendition.location.start.index <= 0 && rendition.location.start.displayed.page <= 0) {
+                alert('已经是第一页了');
+                return;
+            }
+            rendition.prev();
+            updateProgressBar();
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            const currentLocation = rendition.location;
+            if (currentLocation.atEnd) {
+                alert('已经是最后一页了');
+                return;
+            }
+            rendition.next();
+            updateProgressBar();
+        });
+
+        document.getElementById('prevChapter').addEventListener('click', () => {
+            if (currentChapter <= 0) {
+                alert('已经是第一章了');
+                return;
+            }
+            currentChapter--;
+            rendition.display(book.spine.get(currentChapter).href);
+            updateProgressBar();
+        });
+
+        document.getElementById('nextChapter').addEventListener('click', () => {
+            if (currentChapter >= book.spine.length - 1) {
+                alert('已经是最后一章了');
+                return;
+            }
+            currentChapter++;
+            rendition.display(book.spine.get(currentChapter).href);
+            updateProgressBar();
+        });
+
+        function updateNavigation() {
+            document.getElementById('prevPage').disabled = currentPage <= 0;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages - 1;
+            document.getElementById('prevChapter').disabled = currentChapter <= 0;
+            document.getElementById('nextChapter').disabled = currentChapter >= book.spine.length - 1;
+        }
+
+        document.getElementById('selectBook').addEventListener('click', () => {
+            fileElem.click();
+        });
+
+        function handleWheel(e) {
+            e.preventDefault(); // 防止默认滚动行为
+            const pageMode = document.getElementById('pageMode').value;
+            const pageCount = document.getElementById('pageCount').value;
+
+            // 向左翻页流模式
+            if (pageMode === 'slide') {
+                // 添加节流，防滚动太快
+                if (this.wheelTimeout) {
+                    return;
+                }
+
+                this.wheelTimeout = setTimeout(() => {
+                    this.wheelTimeout = null;
+                }, 300); // 将节流时间改为 300ms，使响应更灵敏
+
+                if (e.deltaY > 0) {
+                    rendition.next();
+                    epubViewer.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        epubViewer.style.transform = 'translateX(0)';
+                    }, 50);
+                } else {
+                    rendition.prev();
+                    epubViewer.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        epubViewer.style.transform = 'translateX(0)';
+                    }, 50);
+                }
+            }
+            // 滚动流模式保持不变
+            else if (pageMode === 'scroll') {
+                if (pageCount === '2') {
+                    const leftPage = epubViewer.children[0];
+                    const rightPage = epubViewer.children[1];
+
+                    leftPage.scrollTop += e.deltaY;
+
+                    if (leftPage.scrollTop + leftPage.clientHeight >= leftPage.scrollHeight) {
+                        rightPage.scrollTop += e.deltaY;
+
+                        if (rightPage.scrollTop + rightPage.clientHeight >= rightPage.scrollHeight) {
+                            rendition.next();
+                        }
+                    }
+                } else {
+                    const page = epubViewer.children[0];
+                    page.scrollTop += e.deltaY;
+
+                    if (page.scrollTop + page.clientHeight >= page.scrollHeight) {
+                        rendition.next();
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('keydown', function (e) {
+            // 如果当前焦点在输入框或文本区域，则不处理快捷键
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            // 防止按键事件影响文档滚动
+            if (['F', 'f', 'A', 'a', 'D', 'd', 'Q', 'q', 'E', 'e'].includes(e.key)) {
+                e.preventDefault();
+            }
+
+            if (e.key === 'f' || e.key === 'F') {
+                fileElem.click();
+            } else if (e.key === 'a' || e.key === 'A') {
+                if (rendition && rendition.location.start.index <= 0 && rendition.location.start.displayed.page <= 0) {
+                    alert('已经是第一页了');
+                    return;
+                }
+                rendition && rendition.prev();
+            } else if (e.key === 'd' || e.key === 'D') {
+                if (rendition) {
+                    const currentLocation = rendition.location;
+                    if (currentLocation.atEnd) {
+                        alert('已经是最后一页了');
+                        return;
+                    }
+                    rendition.next();
+                }
+            } else if (e.key === 'q' || e.key === 'Q') {
+                if (currentChapter <= 0) {
+                    alert('已经是第一章了');
+                    return;
+                }
+                currentChapter--;
+                rendition && rendition.display(book.spine.get(currentChapter).href);
+            } else if (e.key === 'e' || e.key === 'E') {
+                if (currentChapter >= book.spine.length - 1) {
+                    alert('已经是最后一章了');
+                    return;
+                }
+                currentChapter++;
+                rendition && rendition.display(book.spine.get(currentChapter).href);
+            }
+        }, true); // 添加 true 参数使用捕获阶段
+
+        let autoScrollInterval;
+        const autoScrollCheckbox = document.getElementById('autoScroll');
+        const scrollSpeedInput = document.getElementById('scrollSpeed');
+
+        // 添加自动滚动复选框的事件监听
+        autoScrollCheckbox.addEventListener('change', function () {
+            const pageMode = document.getElementById('pageMode').value;
+            scrollSpeedInput.disabled = !this.checked;
+
+            if (this.checked && pageMode === 'scroll') {
+                startAutoScroll();
+            } else {
+                stopAutoScroll();
+            }
+        });
+
+        // 添加滚动速度改变的事件监听
+        scrollSpeedInput.addEventListener('input', function () {
+            if (autoScrollCheckbox.checked) {
+                stopAutoScroll();
+                startAutoScroll();
+            }
+        });
+
+        // 添加翻页模式改变的事件监听
+        document.getElementById('pageMode').addEventListener('change', function () {
+            if (this.value !== 'scroll') {
+                autoScrollCheckbox.checked = false;
+                scrollSpeedInput.disabled = true;
+                stopAutoScroll();
+            }
+        });
+
+        function startAutoScroll() {
+            stopAutoScroll(); // 先停止现有的自动滚动
+            const speed = scrollSpeedInput.value;
+            const scrollStep = speed * 0.5; // 调整滚动步长
+
+            autoScrollInterval = setInterval(() => {
+                const pageCount = document.getElementById('pageCount').value;
+                if (pageCount === '2') {
+                    const leftPage = epubViewer.children[0];
+                    const rightPage = epubViewer.children[1];
+
+                    if (leftPage.scrollTop + leftPage.clientHeight >= leftPage.scrollHeight) {
+                        if (rightPage.scrollTop + rightPage.clientHeight >= rightPage.scrollHeight) {
+                            rendition.next();
+                        } else {
+                            rightPage.scrollTop += scrollStep;
+                        }
+                    } else {
+                        leftPage.scrollTop += scrollStep;
+                    }
+                } else {
+                    const page = epubViewer.children[0];
+                    if (page.scrollTop + page.clientHeight >= page.scrollHeight) {
+                        rendition.next();
+                    } else {
+                        page.scrollTop += scrollStep;
+                    }
+                }
+            }, 50); // 每50毫秒执行次
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+            }
+        }
+
+        // 在切换章节时停止自动滚动
+        rendition.on('relocated', function () {
+            if (autoScrollCheckbox.checked) {
+                stopAutoScroll();
+                startAutoScroll();
+            }
+        });
+
+        function updateProgressBar() {
+            if (!book || !rendition) return;
+
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            // 获取当前位置信息
+            const currentLocation = rendition.currentLocation();
+            if (!currentLocation) return;
+
+            // 计算进度
+            let progress = 0;
+            if (book.locations && book.locations.total) {
+                progress = Math.floor(book.locations.percentageFromCfi(currentLocation.start.cfi) * 100);
+            } else {
+                // 如果locations还没有生成完成，使用spine位置作为临时进度
+                progress = Math.floor((currentLocation.start.index / book.spine.length) * 100);
+            }
+
+            // 更新进度条
+            progressBar.style.width = `${progress}%`;
+
+            // 更新进度文本
+            const currentChapter = book.spine.get(currentLocation.start.index);
+            const chapterTitle = currentChapter ? (currentChapter.title || `第 ${currentLocation.start.index + 1} 章`) : '';
+            progressText.textContent = `${chapterTitle} - ${progress}%`;
+
+            // 调试信息
+            console.log('Progress updated:', progress, '%');
+        }
+    </script>
+</body>
+
+</html>
