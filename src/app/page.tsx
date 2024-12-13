@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Coffee, IceCream } from 'lucide-react';
 import { debounce } from 'lodash';
 
@@ -456,6 +457,8 @@ export default function AnimatedHomepage() {
   return (
     <div className="relative h-screen overflow-hidden" onMouseMove={handleInteraction} onTouchMove={handleInteraction}>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-0" />
+      
+      {/* 主内容 */}
       <div className="relative z-10 flex flex-col md:flex-row h-full">
         <Link href="/cc-space.html" className="group relative flex-1 flex items-center justify-center bg-gradient-to-br from-blue-500/60 to-purple-600/60 transition-all duration-500 ease-in-out hover:flex-[1.5]">
           <div className="text-center">
@@ -473,6 +476,19 @@ export default function AnimatedHomepage() {
             <p className="text-lg text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">点击进入汤圆的世界</p>
           </div>
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+        </a>
+      </div>
+      
+      {/* 底部备案信息 */}
+      <div className="absolute bottom-4 w-full flex justify-center z-20">
+        <a 
+          href="https://beian.mps.gov.cn/#/query/webSearch?code=42090002002025" 
+          rel="noreferrer" 
+          target="_blank" 
+          className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+        >
+          <Image src="/images/备案图标.png" alt="备案图标" width={16} height={16} className="mr-1" />
+          鄂公网安备42090002002025
         </a>
       </div>
     </div>
